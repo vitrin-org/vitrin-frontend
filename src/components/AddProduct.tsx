@@ -9,6 +9,7 @@ import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { productService } from '../services/api';
 import { authService } from '../services/auth';
+import { useCategories } from '../hooks/useCategories';
 import { 
   ArrowLeft, 
   Upload, 
@@ -32,6 +33,7 @@ export function AddProduct({ onNavigate, isLoggedIn = false }: AddProductProps) 
   const [currentTag, setCurrentTag] = useState('');
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { categories, isLoading: isLoadingCategories } = useCategories();
   const [formData, setFormData] = useState({
     productName: '',
     tagline: '',
@@ -109,16 +111,34 @@ export function AddProduct({ onNavigate, isLoggedIn = false }: AddProductProps) 
     
     try {
       // Prepare product data
-      const productPayload = {
-        title: formData.productName,
-        short_description: formData.tagline,
-        description: formData.description,
-        category: formData.category,
-        website_url: formData.website,
-        status: isDraft ? 'draft' : 'published',
-        tags: tags,
-        // Note: In a real app, you'd need to handle image uploads separately
-      };
+      const productPayload = new FormData();
+      productPayload.append('title', formData.productName);
+      productPayload.append('short_description', formData.tagline);
+      productPayload.append('description', formData.description);
+      productPayload.append('category', formData.category);
+      productPayload.append('website_url', formData.website);
+      productPayload.append('status', isDraft ? 'draft' : 'published');
+      
+      // Add tags
+      tags.forEach(tag => {
+        productPayload.append('tags', tag);
+      });
+      
+      // Add images if uploaded
+      if (uploadedImages.length > 0) {
+        uploadedImages.forEach((imageData, index) => {
+          // Convert base64 to blob and append to FormData
+          const base64Data = imageData.split(',')[1];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'image/jpeg' });
+          productPayload.append('images', blob, `product-image-${index}.jpg`);
+        });
+      }
       
       console.log('Sending product data:', productPayload);
       
@@ -239,15 +259,14 @@ export function AddProduct({ onNavigate, isLoggedIn = false }: AddProductProps) 
                     <Label htmlFor="category">Category *</Label>
                     <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
                       <SelectTrigger className="h-12">
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={isLoadingCategories ? "Loading categories..." : "Select category"} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="ai-tools">AI Tools</SelectItem>
-                        <SelectItem value="saas">SaaS</SelectItem>
-                        <SelectItem value="mobile-apps">Mobile Apps</SelectItem>
-                        <SelectItem value="design-tools">Design Tools</SelectItem>
-                        <SelectItem value="productivity">Productivity</SelectItem>
-                        <SelectItem value="developer-tools">Developer Tools</SelectItem>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.slug}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -282,7 +301,7 @@ export function AddProduct({ onNavigate, isLoggedIn = false }: AddProductProps) 
               <CardContent>
                 {/* Main Image Upload */}
                 <div className="space-y-4">
-                  <Label>Main Product Image *</Label>
+                  <Label>Product Images *</Label>
                   <div className="relative">
                     <input
                       type="file"
@@ -299,7 +318,7 @@ export function AddProduct({ onNavigate, isLoggedIn = false }: AddProductProps) 
                         <div>
                           <p className="font-medium">Click to upload images</p>
                           <p className="text-sm text-muted-foreground">
-                            JPG, PNG, GIF up to 10MB each
+                            JPG, PNG, GIF up to 10MB each. You can upload multiple images.
                           </p>
                         </div>
                       </div>

@@ -120,11 +120,12 @@ export function LoginSignup({
       const confirmPassword = formData.get('confirmPassword') as string;
 
       if (isLogin) {
-        // Login logic
-        console.log('Login attempt:', { email, password });
+        // Login logic - use email field as username for login
+        const loginUsername = email; // The email field contains username for login
+        console.log('Login attempt:', { username: loginUsername, password });
         
         try {
-          const userData = await authService.login(email, password);
+          const userData = await authService.login(loginUsername, password);
           console.log('Login successful:', userData);
           onLogin(true);
           onNavigate("home");

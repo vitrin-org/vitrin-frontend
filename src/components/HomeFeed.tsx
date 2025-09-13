@@ -20,7 +20,20 @@ interface Product {
   view_count: number;
   created_at: string;
   author: { username: string };
-  image: string;
+  images: Array<{
+    id: number;
+    image: string;
+    alt_text: string;
+    is_primary: boolean;
+    position: number;
+  }>;
+  primary_image: {
+    id: number;
+    image: string;
+    alt_text: string;
+    is_primary: boolean;
+    position: number;
+  } | null;
   isNew?: boolean;
   featured?: boolean;
 }
@@ -52,18 +65,18 @@ export function HomeFeed({ onNavigate }: HomeFeedProps) {
         productService.getCategories()
       ]);
       
-      setProducts(productsResponse.data.results || []);
+      setProducts(productsResponse.results || []);
       
       // Create categories with real counts
       const categoryCounts: { [key: string]: number } = {};
-      productsResponse.data.results?.forEach((product: Product) => {
+      productsResponse.results?.forEach((product: Product) => {
         categoryCounts[product.category.name] = (categoryCounts[product.category.name] || 0) + 1;
       });
       
-      const allCount = productsResponse.data.results?.length || 0;
+      const allCount = productsResponse.results?.length || 0;
       const categoriesWithCounts = [
         { name: 'All', count: allCount },
-        ...categoriesResponse.data.map((cat: any) => ({
+        ...categoriesResponse.results.map((cat: any) => ({
           name: cat.name,
           count: categoryCounts[cat.name] || 0
         }))
@@ -253,7 +266,7 @@ export function HomeFeed({ onNavigate }: HomeFeedProps) {
             <CardContent className="p-0">
               <div className="relative">
                 <ImageWithFallback
-                  src={product.image}
+                  src={product.primary_image?.image || ''}
                   alt={product.title}
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                 />

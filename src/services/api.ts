@@ -137,7 +137,19 @@ export const productService = {
   getProduct: (id: string | number) => apiService.get(API_ENDPOINTS.PRODUCT_DETAIL(id)),
   
   // Create product
-  createProduct: (data: any) => apiService.post(API_ENDPOINTS.PRODUCTS, data),
+  createProduct: (data: any) => {
+    if (data instanceof FormData) {
+      // Handle FormData for file uploads
+      return api.post(API_ENDPOINTS.PRODUCTS, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }).then(response => response.data);
+    } else {
+      // Handle regular JSON data
+      return apiService.post(API_ENDPOINTS.PRODUCTS, data);
+    }
+  },
   
   // Update product
   updateProduct: (id: string | number, data: any) => apiService.put(API_ENDPOINTS.PRODUCT_DETAIL(id), data),

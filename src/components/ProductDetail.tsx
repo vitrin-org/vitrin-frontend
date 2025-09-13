@@ -38,7 +38,7 @@ export function ProductDetail({ onNavigate }: ProductDetailProps) {
 
   // For demo purposes, we'll use a hardcoded product ID
   // In a real app, this would come from URL params or navigation state
-  const productId = 9; // The published product we created earlier
+  const productId = 3; // The published product we created earlier
 
   useEffect(() => {
     fetchProductData();
@@ -177,10 +177,10 @@ export function ProductDetail({ onNavigate }: ProductDetailProps) {
               </div>
 
               {/* Product Image */}
-              {product.image && (
+              {product.primary_image && (
                 <div className="rounded-xl overflow-hidden">
                   <ImageWithFallback
-                    src={product.image}
+                    src={product.primary_image.image}
                     alt={product.title}
                     className="w-full h-96 object-cover"
                   />

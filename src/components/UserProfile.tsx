@@ -60,7 +60,7 @@ export function UserProfile({ onNavigate }: UserProfileProps) {
       ]);
 
       setUserProfile(profileResponse);
-      setUserProducts(productsResponse.data?.results || []);
+      setUserProducts(productsResponse.results || []);
     } catch (error) {
       console.error('Error fetching user data:', error);
       setError('Failed to load profile data');
@@ -252,7 +252,7 @@ export function UserProfile({ onNavigate }: UserProfileProps) {
                       <CardContent className="p-0">
                         <div className="relative">
                           <ImageWithFallback
-                            src={product.image || ''}
+                            src={product.primary_image?.image || ''}
                             alt={product.title}
                             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                             onClick={() => onNavigate('product-detail')}

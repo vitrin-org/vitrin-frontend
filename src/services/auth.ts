@@ -1,4 +1,6 @@
 // Authentication service for managing JWT tokens
+import { config } from '../config/env';
+
 export interface AuthTokens {
   access: string;
   refresh: string;
@@ -93,7 +95,7 @@ class AuthService {
 
   // Login user
   public async login(username: string, password: string): Promise<AuthResponse> {
-    const response = await fetch('http://localhost:8000/api/users/auth/login/', {
+    const response = await fetch(`${config.API_BASE_URL}/users/auth/login/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -121,7 +123,7 @@ class AuthService {
     first_name: string;
     last_name: string;
   }): Promise<AuthResponse> {
-    const response = await fetch('http://localhost:8000/api/users/auth/register/', {
+    const response = await fetch(`${config.API_BASE_URL}/users/auth/register/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -142,7 +144,7 @@ class AuthService {
 
   // Google OAuth login
   public async googleLogin(credential: string): Promise<AuthResponse> {
-    const response = await fetch('http://localhost:8000/api/users/auth/google/', {
+    const response = await fetch(`${config.API_BASE_URL}/users/auth/google/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -169,7 +171,7 @@ class AuthService {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/users/auth/refresh/', {
+      const response = await fetch(`${config.API_BASE_URL}/users/auth/refresh/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
